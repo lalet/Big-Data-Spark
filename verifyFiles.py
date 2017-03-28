@@ -128,6 +128,15 @@ def check_files(conditions_dict):
                 if not path_name in conditions_dict[condition][subject].keys():
                     log_warning("File \"" + path_name  + "\" is missing in subject \"" + subject + "\" of condition \"" + condition + "\".")
 
+def write_comparisions_to_a_file(product,subjects,path_names,root_dir):
+    with open("comparsions.txt", 'w') as infile:
+	for c, d in product:
+	    if c<d:
+		for subject in subjects:
+		    for path_name in path_names:
+                        infile.write(c+","+d+","+subject+","+root_dir+"/"+path_name+"\n")
+        infile.close()
+
 # Returns a dictionary where the keys identifies two conditions
 # (e.g. "condition1 vs condition2") and the values are dictionaries
 # where the keys are path names common to these two conditions and the
@@ -141,23 +150,24 @@ def n_differences_across_subjects(conditions_dict,root_dir,metrics,checksums_fro
     product = ((i,j) for i in conditions_dict.keys() for j in conditions_dict.keys())
     diff={} # Will be the return value
     metric_values={}
+    subjects=conditions_dict.values()[0].keys()
     path_names = conditions_dict.values()[0].values()[0].keys()
     #dictionary_checksum is used for storing the computed checksum values and to avoid computing the checksums for the files multiple times
     dictionary_checksum={}
     #dictionary_executables is used for tracking the files that we have already found the executables for
     dictionary_executables={}
-    #Initialize sqlite connection
+    write_comparisions_to_a_file(product,subjects,path_names,root_dir)
     try:
 	data=json.dumps(checksums_from_file_dict)
 	#print data
-	rdd = subprocess.check_output(["python","cluster-spark-basic.py","--d",data,"--r","3"])
+	#rdd = subprocess.check_output(["python","cluster-spark-basic.py","--d",data,"--r","3"])
         #subprocess.check_output("dir /f",shell=True,stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
     #rdd = subprocess.check_output(["python","cluster-spark-basic.py"])
-    if rdd:
-      print "####### returned RDD #########"
-      print rdd
+    #if rdd:
+      #print "####### returned RDD #########"
+      #print rdd
     if sqlite_db_path:
       try:
         conn = sqlite3.connect(sqlite_db_path)

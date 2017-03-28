@@ -32,6 +32,8 @@ dictionary=yaml.safe_load(json_dictionary)
 #sqlContext.createDataFrame(dictionary).collect()
 condition = sc.parallelize(dictionary)
 
+print dictionary['OS1'][dictionary['OS1'].keys()[0]]
+
 conditions_list = condition.collect()
 print conditions_list
 
@@ -40,13 +42,13 @@ subjects_list=subjects_list[0]
 print subjects_list
 
 file_names=condition.flatMap(lambda x:dictionary[x][dictionary[x].keys()[0]])
-#print file_names
+print file_names
 
 def map_values(conditions_list,subjects_list,file_names):
     for condition in conditions_list:
 	for subject in subjects_list:
-		mapped_values=file_names.map(lambda x:[condition,subject,x]).collect()
-   		print mapped_values
+	  mapped_values=file_names.map(lambda x:[condition,subject,x]).collect()
+   	  print mapped_values
 	
 map_values(conditions_list,subjects_list,file_names)
 
