@@ -5,6 +5,7 @@ from pyspark.sql import SQLContext
 import argparse
 import json
 import yaml
+import hashlib
 
 conf = SparkConf()
 conf.setAppName('spark-basic')
@@ -12,16 +13,33 @@ sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--r", help="some useful description.")
+parser.add_argument("--r", help="root_directory")
 parser.add_argument("--d",help="Dictionary")
 args = parser.parse_args()
 ngrams=None
 dictionary={}
 if args.r:
-    ngrams = args.r
+    root_dir = args.r
+    print root_dir
 if args.d:
     json_dictionary = args.d
 
+
+
+def checksum(path_name):
+     hasher=hashlib.md5()
+     if os.path.isfile(path_name):
+          md5_sum=file_hash(hasher,path_name)
+     elif os.path.isdir(path_name):
+          md5_sum=directory_hash(hasher,path_name)
+     return md5_sum
+
+def find_checksum(x):
+    print x
+    print root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3]
+    #m = hashlib.md5()
+    #m.update(x)
+    return x#+","+m.hexdigest
 
 #dictionary=yaml.safe_load(json_dictionary)
 
@@ -34,7 +52,13 @@ if args.d:
 #condition = sc.parallelize(dictionary)
 
 text_file = sc.textFile("comparsions.txt")
-print text_file.first()
+
+
+all_pairs = text_file.map(lambda x:x.split(",")) \
+       .filter(lambda x:find_checksum(x)) \
+       .collect()
+
+print all_pairs
 
 #print dictionary['OS1'][dictionary['OS1'].keys()[0]]
 
