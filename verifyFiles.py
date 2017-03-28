@@ -129,13 +129,18 @@ def check_files(conditions_dict):
                     log_warning("File \"" + path_name  + "\" is missing in subject \"" + subject + "\" of condition \"" + condition + "\".")
 
 def write_comparisions_to_a_file(product,subjects,path_names,root_dir):
-    with open("comparsions.txt", 'w') as infile:
+    with open("comparsions.txt", 'w') as f:
 	for c, d in product:
 	    if c<d:
 		for subject in subjects:
 		    for path_name in path_names:
-                        infile.write(c+","+d+","+subject+","+root_dir+"/"+path_name+"\n")
-        infile.close()
+                        f.write(c+","+d+","+subject+","+path_name+"\n")
+    f.close()
+    return True 
+
+
+def get_condition_pairs(conditions_dict):
+    return ((i,j) for i in conditions_dict.keys() for j in conditions_dict.keys())
 
 # Returns a dictionary where the keys identifies two conditions
 # (e.g. "condition1 vs condition2") and the values are dictionaries
@@ -147,7 +152,6 @@ def write_comparisions_to_a_file(product,subjects,path_names,root_dir):
 #  means that 'c/c.txt' is identical for all subjects in conditions condition1 and condition2 while 'a.txt' differs in two subjects.
 def n_differences_across_subjects(conditions_dict,root_dir,metrics,checksums_from_file_dict,checksum_after_file_path,check_corruption,sqlite_db_path):
     # For each pair of conditions C1 and C1
-    product = ((i,j) for i in conditions_dict.keys() for j in conditions_dict.keys())
     diff={} # Will be the return value
     metric_values={}
     subjects=conditions_dict.values()[0].keys()
@@ -156,27 +160,30 @@ def n_differences_across_subjects(conditions_dict,root_dir,metrics,checksums_fro
     dictionary_checksum={}
     #dictionary_executables is used for tracking the files that we have already found the executables for
     dictionary_executables={}
-    write_comparisions_to_a_file(product,subjects,path_names,root_dir)
+    #file_write=write_comparisions_to_a_file(product,subjects,path_names,root_dir)
     try:
-	data=json.dumps(checksums_from_file_dict)
+	#data=json.dumps(checksums_from_file_dict)
 	#print data
-	#rdd = subprocess.check_output(["python","cluster-spark-basic.py","--d",data,"--r","3"])
+	file_write=write_comparisions_to_a_file(get_condition_pairs(conditions_dict),subjects,path_names,root_dir)
+	if file_write:
+	  rdd = subprocess.check_output(["python","cluster-spark-basic.py","--d",root_dir,"--r","3"])
+	  if rdd:
+	    print rdd
         #subprocess.check_output("dir /f",shell=True,stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
         raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
-    #rdd = subprocess.check_output(["python","cluster-spark-basic.py"])
-    #if rdd:
-      #print "####### returned RDD #########"
-      #print rdd
+
     if sqlite_db_path:
       try:
-        conn = sqlite3.connect(sqlite_db_path)
+         conn = sqlite3.connect(sqlite_db_path)
       except sqlite3.Error, e:
-        log_error(e)
+         log_error(e)
     # Go through all pairs of conditions
+    product = get_condition_pairs(conditions_dict)
     for c, d in product:
         if c < d: # Makes sure that pairs are not ordered, i.e. {a,b} and {b,a} are the same
             key=c+" vs "+d
+	    print key
             diff[key]={}
             # if c and d both start with x-RUN-y (same x, different
             # y), then assume that they are different runs from the
@@ -194,8 +201,8 @@ def n_differences_across_subjects(conditions_dict,root_dir,metrics,checksums_fro
 	    
 	    #Checking if the runs are intra runs on the same condition(Operating System).
 	      if (condition_c and condition_d) and (condition_c[0]==condition_d[0]):
-		log_info("Identified " + c +" and " + d +" as two different runs of the same condition")
-		is_intra_condition_run=True
+                log_info("Identified " + c +" and " + d +" as two different runs of the same condition")
+	        is_intra_condition_run=True
 	        
    
             for file_name in path_names:
