@@ -183,7 +183,6 @@ def n_differences_across_subjects(conditions_dict,root_dir,metrics,checksums_fro
     for c, d in product:
         if c < d: # Makes sure that pairs are not ordered, i.e. {a,b} and {b,a} are the same
             key=c+" vs "+d
-	    print key
             diff[key]={}
             # if c and d both start with x-RUN-y (same x, different
             # y), then assume that they are different runs from the
