@@ -166,7 +166,7 @@ def n_differences_across_subjects(conditions_dict,root_dir,metrics,checksums_fro
 	#print data
 	file_write=write_comparisions_to_a_file(get_condition_pairs(conditions_dict),subjects,path_names,root_dir)
 	if file_write:
-	  rdd = subprocess.check_output(["python","cluster-spark-basic.py","--d",root_dir,"--r","3"])
+	  rdd = subprocess.check_output(["python","cluster-spark-basic.py","--r",root_dir,"--d","3"])
 	  if rdd:
 	    print rdd
         #subprocess.check_output("dir /f",shell=True,stderr=subprocess.STDOUT)
