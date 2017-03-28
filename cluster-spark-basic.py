@@ -6,6 +6,7 @@ import argparse
 import json
 import yaml
 import hashlib
+import os
 
 conf = SparkConf()
 conf.setAppName('spark-basic')
@@ -26,20 +27,32 @@ if args.d:
 
 
 
-def checksum(path_name):
+def get_checksum(path_name):
      hasher=hashlib.md5()
      if os.path.isfile(path_name):
           md5_sum=file_hash(hasher,path_name)
-     elif os.path.isdir(path_name):
-          md5_sum=directory_hash(hasher,path_name)
+     #elif os.path.isdir(path_name):
+          #md5_sum=directory_hash(hasher,path_name)
      return md5_sum
+
+def file_hash(hasher,file_name):
+    file_content=open(file_name)
+    while True:
+      read_buffer=file_content.read(2**20)
+      if len(read_buffer)==0:
+        break
+      hasher.update(read_buffer)
+    file_content.close()
+    return hasher.hexdigest()
 
 def find_checksum(x):
     print x
     print root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3]
     #m = hashlib.md5()
     #m.update(x)
-    return x#+","+m.hexdigest
+    print get_checksum(root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3])
+    print get_checksum(root_dir+"/"+x[1]+"/"+x[2]+"/"+x[3])
+    return x
 
 #dictionary=yaml.safe_load(json_dictionary)
 
