@@ -7,6 +7,8 @@ import json
 import yaml
 import hashlib
 import os
+import nibabel
+import sys
 
 conf = SparkConf()
 conf.setAppName('spark-basic')
@@ -25,6 +27,43 @@ if args.r:
 if args.d:
     json_dictionary = args.d
 
+
+def compute_ssd(x):
+    file_path_1 = root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3]
+    file_path_2 = root_dir+"/"+x[1]+"/"+x[2]+"/"+x[3]
+    im1 = nibabel.load(file_path_1)
+    im2 = nibabel.load(file_path_2)
+        
+    # Check that both images have the same dimensions
+    shape1 = im1.header.get_data_shape()
+    shape2 = im2.header.get_data_shape()
+    if shape1 != shape2:
+        log_error("Images don't have the same shape!")
+
+    data1 = im1.get_data()
+    data2 = im2.get_data()
+    
+    xdim = shape1[0]
+    ydim = shape1[1]
+    zdim = shape1[2]
+    ssd=0
+    if len(shape1) == 4:
+      tdim = shape1[3]
+      # Go through all the voxels and get the SSD
+      for x in range(0,xdim):
+            for y in range(0,ydim):
+              for z in range(0,zdim):
+                  for t in range(0,tdim):
+                      ssd += (data1[x][y][z][t]-data2[x][y][z][t])**2
+    else:
+      for x in range(0,xdim):
+          for y in range(0,ydim):
+              for z in range(0,zdim):
+                  ssd += (data1[x][y][z]-data2[x][y][z])**2
+
+    # That's it!
+    return ssd
+	
 
 
 def get_checksum(path_name):
@@ -54,11 +93,13 @@ def find_if_different(x):
     checksum_1=get_checksum(root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3])
     checksum_2=get_checksum(root_dir+"/"+x[1]+"/"+x[2]+"/"+x[3])
     if checksum_1!=checksum_2:
-	return 1
+      	#if ".txt" not in x[3]:
+	    #print "Computing checksum"
+	    #print compute_ssd(x)
+        return 1
     return 0
 
     
-    return x
 
 #dictionary=yaml.safe_load(json_dictionary)
 
@@ -80,7 +121,16 @@ all_pairs = text_file.map(lambda x:x.split(",")) \
        .reduceByKey(lambda x, y: x+y ) \
        .collect()
 
+       #.map(lambda x:(x,compute_ssd(x[0]) if ".txt" not in x[0][3] else 0)) \
+       #.collect()
+
+       #.map(lambda x:(str(x[0][0]+"_"+x[0][1]+"_"+x[0][3]),x[1])) \
+       #.reduceByKey(lambda x, y: x+y ) \
+       #.collect()
+       #.filter(lambda x:True if x[1] == 1 else False) \
+
 print all_pairs
+print len(all_pairs)
 
 #print dictionary['OS1'][dictionary['OS1'].keys()[0]]
 
