@@ -45,13 +45,19 @@ def file_hash(hasher,file_name):
     file_content.close()
     return hasher.hexdigest()
 
-def find_checksum(x):
-    print x
-    print root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3]
+def find_if_different(x):
+    #print x
+    #print root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3]
     #m = hashlib.md5()
     #m.update(x)
-    print get_checksum(root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3])
-    print get_checksum(root_dir+"/"+x[1]+"/"+x[2]+"/"+x[3])
+    
+    checksum_1=get_checksum(root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3])
+    checksum_2=get_checksum(root_dir+"/"+x[1]+"/"+x[2]+"/"+x[3])
+    if checksum_1!=checksum_2:
+	return 1
+    return 0
+
+    
     return x
 
 #dictionary=yaml.safe_load(json_dictionary)
@@ -68,7 +74,10 @@ text_file = sc.textFile("comparsions.txt")
 
 
 all_pairs = text_file.map(lambda x:x.split(",")) \
-       .filter(lambda x:find_checksum(x)) \
+       .map(lambda x:(x,find_if_different(x))) \
+       .filter(lambda x:True if x[1] == 1 else False) \
+       .map(lambda x:(str(x[0][0]+"_"+x[0][1]+"_"+x[0][3]),x[1])) \
+       .reduceByKey(lambda x, y: x+y ) \
        .collect()
 
 print all_pairs
@@ -88,7 +97,7 @@ print all_pairs
 def map_values(conditions_list,subjects_list,file_names):
     for condition in conditions_list:
 	for subject in subjects_list:
-	  mapped_values=file_names.map(lambda x:[condition,subject,x]).collect()
+	  mapped_values=file_names.flatMap(lambda x:[condition,subject]).collect()
    	  print mapped_values
 	
 #map_values(conditions_list,subjects_list,file_names)
