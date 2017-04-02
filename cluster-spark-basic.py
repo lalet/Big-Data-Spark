@@ -9,9 +9,11 @@ import hashlib
 import os
 import nibabel
 import sys
+from time import gmtime, strftime
 
-conf = SparkConf()
-conf.setAppName('spark-basic')
+conf = SparkConf() \
+       .setMaster("local[*]") \
+       .setAppName('spark-basic')
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
 
@@ -29,6 +31,7 @@ if args.d:
 
 
 def compute_ssd(x):
+    print "Enter:",strftime("%Y-%m-%d %H:%M:%S", gmtime())
     file_path_1 = root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3]
     file_path_2 = root_dir+"/"+x[1]+"/"+x[2]+"/"+x[3]
     im1 = nibabel.load(file_path_1)
@@ -62,6 +65,7 @@ def compute_ssd(x):
                   ssd += (data1[x][y][z]-data2[x][y][z])**2
 
     # That's it!
+    print "Exit:",strftime("%Y-%m-%d %H:%M:%S", gmtime())
     return ssd
 	
 
@@ -93,11 +97,11 @@ def find_if_different(x):
     checksum_1=get_checksum(root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3])
     checksum_2=get_checksum(root_dir+"/"+x[1]+"/"+x[2]+"/"+x[3])
     if checksum_1!=checksum_2:
-      	#if ".txt" not in x[3]:
-	    #print "Computing checksum"
-	    #print compute_ssd(x)
-        return 1
-    return 0
+      	if ".txt" not in x[3] and ".mat" not in x[3]:
+	    print "Computing ssd"
+	    return 1,compute_ssd(x)
+        return 1,0
+    return 0,0
 
     
 
@@ -116,10 +120,13 @@ text_file = sc.textFile("comparsions.txt")
 
 all_pairs = text_file.map(lambda x:x.split(",")) \
        .map(lambda x:(x,find_if_different(x))) \
-       .filter(lambda x:True if x[1] == 1 else False) \
+       .filter(lambda x:True if x[1][0] == 1 else False) \
        .map(lambda x:(str(x[0][0]+"_"+x[0][1]+"_"+x[0][3]),x[1])) \
-       .reduceByKey(lambda x, y: x+y ) \
+       .reduceByKey(lambda x, y:(x[0]+y[0],x[1]+y[1])) \
        .collect()
+
+       #.reduceByKey(lambda x, y: x+y ) \
+       #.collect()
 
        #.map(lambda x:(x,compute_ssd(x[0]) if ".txt" not in x[0][3] else 0)) \
        #.collect()
