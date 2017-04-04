@@ -161,17 +161,17 @@ def n_differences_across_subjects(conditions_dict,root_dir,metrics,checksums_fro
     #dictionary_executables is used for tracking the files that we have already found the executables for
     dictionary_executables={}
     #file_write=write_comparisions_to_a_file(product,subjects,path_names,root_dir)
-    #try:
+    try:
 	#data=json.dumps(checksums_from_file_dict)
 	#print data
-	#file_write=write_comparisions_to_a_file(get_condition_pairs(conditions_dict),subjects,path_names,root_dir)
-	#if file_write:
-	  #rdd = subprocess.check_output(["python","cluster-spark-basic.py","--r",root_dir,"--d","3"])
-	  #if rdd:
-	    #print rdd
+	file_write=write_comparisions_to_a_file(get_condition_pairs(conditions_dict),subjects,path_names,root_dir)
+	if file_write:
+	  rdd = subprocess.check_output(["python","cluster-spark-basic.py","--r",root_dir,"--d","3"])
+	  if rdd:
+	    print rdd
         #subprocess.check_output("dir /f",shell=True,stderr=subprocess.STDOUT)
-    #except subprocess.CalledProcessError as e:
-        #raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
 
     if sqlite_db_path:
       try:
