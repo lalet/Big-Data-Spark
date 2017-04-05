@@ -162,7 +162,6 @@ def n_differences_across_subjects(conditions_dict,root_dir,metrics,checksums_fro
     dictionary_executables={}
     #file_write=write_comparisions_to_a_file(product,subjects,path_names,root_dir)
     try:
-	#data=json.dumps(checksums_from_file_dict)
 	#print data
 	file_write=write_comparisions_to_a_file(get_condition_pairs(conditions_dict),subjects,path_names,root_dir)
 	if file_write:
