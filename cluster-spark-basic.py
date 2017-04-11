@@ -89,21 +89,16 @@ def file_hash(hasher,file_name):
 def find_if_different(x):
     print x
     if len(x) == 6:
-      if x[4]== x[5]:
-	return 0,0
-      else:
-	if ".txt" not in x[3] and ".mat" not in x[3]:
-	  print "Computing ssd using checksum"
-	  return 1,compute_ssd(x)
-      return 1,0
+      checksum_1=x[4]
+      checksum_2=x[5]
     else:
       print "Computing checksum locally"
       checksum_1=get_checksum(root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3])
       checksum_2=get_checksum(root_dir+"/"+x[1]+"/"+x[2]+"/"+x[3])
-      if checksum_1!=checksum_2:
-      	 if ".txt" not in x[3] and ".mat" not in x[3]:
-	    print "Computing ssd with difference found locally"
-	    return 1,compute_ssd(x)
+    if checksum_1!=checksum_2:
+      if ".txt" not in x[3] and ".mat" not in x[3]:
+        print "Computing ssd with difference found locally"
+	return 1,compute_ssd(x)
       return 1,0
     return 0,0
 
