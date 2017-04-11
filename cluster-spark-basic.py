@@ -74,8 +74,6 @@ def get_checksum(path_name):
      hasher=hashlib.md5()
      if os.path.isfile(path_name):
           md5_sum=file_hash(hasher,path_name)
-     #elif os.path.isdir(path_name):
-          #md5_sum=directory_hash(hasher,path_name)
      return md5_sum
 
 def file_hash(hasher,file_name):
@@ -89,33 +87,29 @@ def file_hash(hasher,file_name):
     return hasher.hexdigest()
 
 def find_if_different(x):
-    #print x
-    #print root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3]
-    #m = hashlib.md5()
-    #m.update(x)
-    
-    checksum_1=get_checksum(root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3])
-    checksum_2=get_checksum(root_dir+"/"+x[1]+"/"+x[2]+"/"+x[3])
-    if checksum_1!=checksum_2:
-      	if ".txt" not in x[3] and ".mat" not in x[3]:
-	    print "Computing ssd"
+    print x
+    if len(x) == 6:
+      if x[4]== x[5]:
+	return 0,0
+      else:
+	if ".txt" not in x[3] and ".mat" not in x[3]:
+	  print "Computing ssd using checksum"
+	  return 1,compute_ssd(x)
+      return 1,0
+    else:
+      print "Computing checksum locally"
+      checksum_1=get_checksum(root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3])
+      checksum_2=get_checksum(root_dir+"/"+x[1]+"/"+x[2]+"/"+x[3])
+      if checksum_1!=checksum_2:
+      	 if ".txt" not in x[3] and ".mat" not in x[3]:
+	    print "Computing ssd with difference found locally"
 	    return 1,compute_ssd(x)
-        return 1,0
+      return 1,0
     return 0,0
 
     
 
-#dictionary=yaml.safe_load(json_dictionary)
-
-#print "****************************"
-
-#print ngrams
-
-#sqlContext.createDataFrame(dictionary).collect()
-
-#condition = sc.parallelize(dictionary)
-
-text_file = sc.textFile("comparsions.txt")
+text_file = sc.textFile("comparisons.txt")
 
 
 all_pairs = text_file.map(lambda x:x.split(",")) \
@@ -125,31 +119,8 @@ all_pairs = text_file.map(lambda x:x.split(",")) \
        .reduceByKey(lambda x, y:(x[0]+y[0],x[1]+y[1])) \
        .collect()
 
-       #.reduceByKey(lambda x, y: x+y ) \
-       #.collect()
-
-       #.map(lambda x:(x,compute_ssd(x[0]) if ".txt" not in x[0][3] else 0)) \
-       #.collect()
-
-       #.map(lambda x:(str(x[0][0]+"_"+x[0][1]+"_"+x[0][3]),x[1])) \
-       #.reduceByKey(lambda x, y: x+y ) \
-       #.collect()
-       #.filter(lambda x:True if x[1] == 1 else False) \
-
 print all_pairs
 print len(all_pairs)
-
-#print dictionary['OS1'][dictionary['OS1'].keys()[0]]
-
-#conditions_list = condition.collect()
-#print conditions_list
-
-#subjects_list=condition.map(lambda x:dictionary[x].keys()).collect()
-#subjects_list=subjects_list[0]
-#print subjects_list
-
-#file_names=condition.flatMap(lambda x:dictionary[x][dictionary[x].keys()[0]])
-#print file_names
 
 def map_values(conditions_list,subjects_list,file_names):
     for condition in conditions_list:
@@ -157,10 +128,3 @@ def map_values(conditions_list,subjects_list,file_names):
 	  mapped_values=file_names.flatMap(lambda x:[condition,subject]).collect()
    	  print mapped_values
 	
-#map_values(conditions_list,subjects_list,file_names)
-
-#files=condition.map(lambda x:dictionary[x][dictionary[x].keys()[0]]).collect()
-#print files
-
-
-#print(str(rdd))

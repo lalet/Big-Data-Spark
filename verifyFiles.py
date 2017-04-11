@@ -128,13 +128,16 @@ def check_files(conditions_dict):
                 if not path_name in conditions_dict[condition][subject].keys():
                     log_warning("File \"" + path_name  + "\" is missing in subject \"" + subject + "\" of condition \"" + condition + "\".")
 
-def write_comparisions_to_a_file(product,subjects,path_names,root_dir):
-    with open("comparsions.txt", 'w') as f:
+def write_comparisions_to_a_file(product,subjects,path_names,root_dir,checksums_from_file_dict):
+    with open("comparisons.txt", 'w') as f:
 	for c, d in product:
 	    if c<d:
 		for subject in subjects:
 		    for path_name in path_names:
-                        f.write(c+","+d+","+subject+","+path_name+"\n")
+			if checksums_from_file_dict:
+			  f.write(c+","+d+","+subject+","+path_name+","+checksums_from_file_dict[c][subject][path_name]+","+checksums_from_file_dict[d][subject][path_name]+"\n")
+			else:
+                          f.write(c+","+d+","+subject+","+path_name+"\n")
     f.close()
     return True 
 
@@ -163,7 +166,7 @@ def n_differences_across_subjects(conditions_dict,root_dir,metrics,checksums_fro
     #file_write=write_comparisions_to_a_file(product,subjects,path_names,root_dir)
     try:
 	#print data
-	file_write=write_comparisions_to_a_file(get_condition_pairs(conditions_dict),subjects,path_names,root_dir)
+	file_write=write_comparisions_to_a_file(get_condition_pairs(conditions_dict),subjects,path_names,root_dir,checksums_from_file_dict)
 	if file_write:
 	  rdd = subprocess.check_output(["python","cluster-spark-basic.py","--r",root_dir,"--d","3"])
 	  if rdd:
