@@ -10,7 +10,7 @@ import os
 import nibabel
 import sys
 from time import gmtime, strftime
-
+#Spark configuration
 conf = SparkConf() \
        .setMaster("local[*]") \
        .setAppName('spark-basic')
@@ -29,7 +29,8 @@ if args.r:
 if args.d:
     json_dictionary = args.d
 
-
+#Function to compute ssd
+#Input is a pair of conditions and a common file
 def compute_ssd(x):
     print "Enter:",strftime("%Y-%m-%d %H:%M:%S", gmtime())
     file_path_1 = root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3]
@@ -69,13 +70,14 @@ def compute_ssd(x):
     return ssd
 	
 
-
+#Function to compute checksum locally
 def get_checksum(path_name):
      hasher=hashlib.md5()
      if os.path.isfile(path_name):
           md5_sum=file_hash(hasher,path_name)
      return md5_sum
 
+#Function to read the contents for creating the checksum
 def file_hash(hasher,file_name):
     file_content=open(file_name)
     while True:
@@ -86,27 +88,28 @@ def file_hash(hasher,file_name):
     file_content.close()
     return hasher.hexdigest()
 
+#Function to find if files differ in their checksum
 def find_if_different(x):
-    print x
     if len(x) == 6:
+      #print "Checksums from file"
       checksum_1=x[4]
       checksum_2=x[5]
     else:
-      print "Computing checksum locally"
+      #print "Computing checksum locally"
       checksum_1=get_checksum(root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3])
       checksum_2=get_checksum(root_dir+"/"+x[1]+"/"+x[2]+"/"+x[3])
     if checksum_1!=checksum_2:
       if ".txt" not in x[3] and ".mat" not in x[3]:
-        print "Computing ssd with difference found locally"
+        print "Computing ssd"
 	return 1,compute_ssd(x)
       return 1,0
     return 0,0
 
     
-
+#Read input file
 text_file = sc.textFile("comparisons.txt")
 
-
+#Spark map and reduce jobs
 all_pairs = text_file.map(lambda x:x.split(",")) \
        .map(lambda x:(x,find_if_different(x))) \
        .filter(lambda x:True if x[1][0] == 1 else False) \
@@ -115,11 +118,5 @@ all_pairs = text_file.map(lambda x:x.split(",")) \
        .collect()
 
 print all_pairs
-print len(all_pairs)
 
-def map_values(conditions_list,subjects_list,file_names):
-    for condition in conditions_list:
-	for subject in subjects_list:
-	  mapped_values=file_names.flatMap(lambda x:[condition,subject]).collect()
-   	  print mapped_values
 	
