@@ -11,7 +11,7 @@ cluster-spark-basic.py is a Python Script which will trigger the spark job and c
 
 ### Prerequisites
 
-Python 2.7.5
+Python 2.7.5    
 Pyspark
 
 ## Running the script
