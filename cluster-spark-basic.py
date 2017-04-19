@@ -3,13 +3,17 @@ from pyspark import SparkConf
 from pyspark import SparkContext
 from pyspark.sql import SQLContext
 import argparse
+import logging
 import json
 import yaml
 import hashlib
 import os
 import nibabel
 import sys
+import commands
 from time import gmtime, strftime
+import subprocess
+
 #Spark configuration
 conf = SparkConf() \
        .setMaster("local[*]") \
@@ -69,6 +73,22 @@ def compute_ssd(x):
     print "Exit:",strftime("%Y-%m-%d %H:%M:%S", gmtime())
     return ssd
 	
+#Compute mse
+def compute_mse(x):
+   file_path_1 = root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3]
+   file_path_2 = root_dir+"/"+x[1]+"/"+x[2]+"/"+x[3]
+   command_string = "./mse.sh"+" "+file_path_1+" "+file_path_2+" "+"2>/dev/tty"
+   return_value,output = commands.getstatusoutput(command_string)
+   if return_value != 0:
+     log_error(str(return_value)+" "+ str(output) +" "+"Command "+ "mse.sh" +" failed ("+command_string+").")
+   return output
+
+#Log Error
+def log_error(message):
+  logging.error("ERROR: " + message)
+  sys.exit(1)
+
+
 
 #Function to compute checksum locally
 def get_checksum(path_name):
@@ -94,14 +114,15 @@ def find_if_different(x):
       #print "Checksums from file"
       checksum_1=x[4]
       checksum_2=x[5]
+
     else:
       #print "Computing checksum locally"
       checksum_1=get_checksum(root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3])
       checksum_2=get_checksum(root_dir+"/"+x[1]+"/"+x[2]+"/"+x[3])
     if checksum_1!=checksum_2:
       if ".txt" not in x[3] and ".mat" not in x[3]:
-        print "Computing ssd"
-	return 1,compute_ssd(x)
+        print "Computing mse"
+	return 1,compute_mse(x)
       return 1,0
     return 0,0
 
