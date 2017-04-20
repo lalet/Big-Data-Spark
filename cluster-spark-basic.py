@@ -18,6 +18,8 @@ import shutil
 #Spark configuration
 conf = SparkConf() \
        .setMaster("local[*]") \
+       .set("spark.executor.cores","5") \
+       .set("spark.executor.instances","12")\
        .setAppName('spark-basic')
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
