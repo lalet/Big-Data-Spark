@@ -18,8 +18,8 @@ import shutil
 #Spark configuration
 conf = SparkConf() \
        .setMaster("local[*]") \
-       .set("spark.executor.cores","5") \
-       .set("spark.executor.instances","12")\
+       .set("spark.executor.cores","8") \
+       .set("spark.executor.instances","2")\
        .setAppName('spark-basic')
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
@@ -142,7 +142,7 @@ def find_if_different(x):
       checksum_2=get_checksum(root_dir+"/"+x[1]+"/"+x[2]+"/"+x[3])
     if checksum_1!=checksum_2:
       if ".txt" not in x[3] and ".mat" not in x[3]:
-        print "Computing mse"
+        print "Computing mean squared error value"
 	return 1,compute_mse(x)
       return 1,0
     return 0,0
