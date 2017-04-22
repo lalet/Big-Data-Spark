@@ -147,6 +147,7 @@ def find_if_different(x):
       return 1,0
     return 0,0
 
+#To do,check why the reducebykey is not doing the summation operation
     
 #Read input file
 text_file = sc.textFile("comparisons.txt")
