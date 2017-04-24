@@ -15,7 +15,7 @@ from time import gmtime, strftime
 import subprocess
 import shutil
 
-#Spark configuration
+#Spark configuration, tuning parameters !!
 conf = SparkConf() \
        .setMaster("local[*]") \
        .set("spark.executor.cores","8") \
