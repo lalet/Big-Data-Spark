@@ -143,7 +143,7 @@ def find_if_different(x):
     if checksum_1!=checksum_2:
       if ".txt" not in x[3] and ".mat" not in x[3]:
         print "Computing mean squared error value"
-	return 1,compute_mse(x)
+	return 1,float(compute_mse(x))
       return 1,0
     return 0,0
 
