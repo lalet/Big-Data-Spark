@@ -18,8 +18,9 @@ import shutil
 #Spark configuration, tuning parameters !!
 conf = SparkConf() \
        .setMaster("local[*]") \
-       .set("spark.executor.cores","8") \
-       .set("spark.executor.instances","2")\
+       .set("spark.executor.cores","5") \
+       .set("spark.executor.instances","12")\
+       .set("spark.executor.memory","1g") \
        .setAppName('spark-basic')
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
