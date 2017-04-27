@@ -16,6 +16,7 @@ import subprocess
 import shutil
 
 #Spark configuration, tuning parameters !!
+#Tuning parameters on single system with 8 cores doesn't show much improvement
 conf = SparkConf() \
        .setMaster("local[*]") \
        .set("spark.executor.cores","5") \
