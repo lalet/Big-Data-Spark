@@ -88,24 +88,6 @@ def compute_mse(x):
      log_error(str(return_value)+" "+ str(output) +" "+"Command "+ "mse.sh" +" failed ("+command_string+").")
    return output
 
-
-#Mse using fslmaths
-#def compute_mse_sh(x):
-  #file_path_1 = root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3]
-  #file_path_2 = root_dir+"/"+x[1]+"/"+x[2]+"/"+x[3]  
-  #diff="diff-XXXX.nii.gz"
-  #sqr="sqr-XXXX.nii.gz"
-  #diff=subprocess.check_output(["mktemp",diff])
-  #sqr=subprocess.check_output(["mktemp",sqr])
-  #print diff,sqr
-  #subprocess.call(["fslmaths",file_path_1,"-sub",file_path_2,"-sqr",diff])
-  #mean=subprocess.check_output(["fslstats",diff,"-m"])
-  #print mean
-  #os.remove(diff.replace("\n",""))
-  #os.remove(sqr.replace("\n",""))
-  #print "Removed folders"
-  #return mean.replace("\n","")
-
 #Log Error
 def log_error(message):
   logging.error("ERROR: " + message)
