@@ -21,7 +21,6 @@ conf = SparkConf() \
        .setMaster("local[*]") \
        .set("spark.executor.cores","5") \
        .set("spark.executor.instances","12")\
-       .set("spark.executor.memory","1g") \
        .setAppName('spark-basic')
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
@@ -38,45 +37,6 @@ if args.r:
 if args.d:
     json_dictionary = args.d
 
-#Function to compute ssd
-#Input is a pair of conditions and a common file
-#def compute_ssd(x):
-    #print "Enter:",strftime("%Y-%m-%d %H:%M:%S", gmtime())
-    #file_path_1 = root_dir+"/"+x[0]+"/"+x[2]+"/"+x[3]
-    #file_path_2 = root_dir+"/"+x[1]+"/"+x[2]+"/"+x[3]
-    #im1 = nibabel.load(file_path_1)
-    #im2 = nibabel.load(file_path_2)
-        
-    # Check that both images have the same dimensions
-    #shape1 = im1.header.get_data_shape()
-    #shape2 = im2.header.get_data_shape()
-    #if shape1 != shape2:
-        #log_error("Images don't have the same shape!")
-
-    #data1 = im1.get_data()
-    #data2 = im2.get_data()
-    
-    #xdim = shape1[0]
-    #ydim = shape1[1]
-    #zdim = shape1[2]
-    #ssd=0
-    #if len(shape1) == 4:
-      #tdim = shape1[3]
-      # Go through all the voxels and get the SSD
-      #for x in range(0,xdim):
-            #for y in range(0,ydim):
-              #for z in range(0,zdim):
-                  #for t in range(0,tdim):
-                      #ssd += (data1[x][y][z][t]-data2[x][y][z][t])**2
-    #else:
-      #for x in range(0,xdim):
-          #for y in range(0,ydim):
-              #for z in range(0,zdim):
-                  #ssd += (data1[x][y][z]-data2[x][y][z])**2
-
-    # That's it!
-    #print "Exit:",strftime("%Y-%m-%d %H:%M:%S", gmtime())
-    #return ssd
 	
 #Compute mse
 def compute_mse(x):
